@@ -1,0 +1,17 @@
+{
+  "stream_id": "political-wire",
+  "github_user": "ParshantKumar2007",
+  "base_vault_name": "political-wire-vault",
+  "active_vault": "political-wire-vault-1",
+  "active_index": 1,
+  "max_size_mb": 450,
+  "max_articles": 400000,
+  "rollover_history": [
+    {
+      "vault": "political-wire-vault-1",
+      "index": 1,
+      "started_at": "2026-11-13T21:08:00Z",
+      "status": "ACTIVE"
+    }
+  ]
+}

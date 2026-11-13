@@ -1,0 +1,65 @@
+name: Sovereign Political & Policy Wire (24/7)
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: political-wire
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  stream-political-wire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Political Intelligence Engine
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Political Wire Ingestion Cycles
+        env:
+          VAULT_PAT: ${{ secrets.VAULT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Starting Sovereign Political Wire Ingestion..."
+          for i in {1..4}; do
+            echo "================================================="
+            echo "--- Political Stream Cycle $i of 4 ($(date -u +'%Y-%m-%d %H:%M:%S UTC')) ---"
+            echo "================================================="
+            python3 political_wire_streamer.py || echo "[WARN] Cycle $i completed with warnings"
+            echo "Sleeping 60s before next polling cycle..."
+            sleep 60
+          done
+
+      - name: Sync Manifest (Vault Rollover Check)
+        run: |
+          git config user.name "PoliticalBot"
+          git config user.email "bot@intelligence.internal"
+          git add vault_rollover_manifest.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "[ROLLOVER-SYNC] Update active political vault manifest [skip ci]" && git push)
+
+  retrigger:
+    needs: [stream-political-wire]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrigger Political Stream Loop
+        env:
+          GH_TOKEN: ${{ secrets.VAULT_PAT }}
+        run: |
+          echo "Triggering next 24/7 Political Intelligence Loop..."
+          gh workflow run political_wire.yml --repo ParshantKumar2007/political-intelligence-engine || true
