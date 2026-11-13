@@ -1,0 +1,17 @@
+{
+  "stream_id": "pib-cabinet-archive",
+  "github_user": "ParshantKumar2007",
+  "base_vault_name": "pib-cabinet-archive-vault",
+  "active_vault": "pib-cabinet-archive-vault-1",
+  "active_index": 1,
+  "max_size_mb": 450,
+  "max_articles": 400000,
+  "rollover_history": [
+    {
+      "vault": "pib-cabinet-archive-vault-1",
+      "index": 1,
+      "started_at": "2026-11-13T21:20:00Z",
+      "status": "ACTIVE"
+    }
+  ]
+}

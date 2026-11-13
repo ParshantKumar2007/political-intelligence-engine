@@ -1,0 +1,64 @@
+name: Sovereign PIB Cabinet Archive Harvester (24/7)
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: pib-archive-harvester
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  harvest-pib:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Political Intelligence Engine
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Execute PIB Archive Batches
+        env:
+          VAULT_PAT: ${{ secrets.VAULT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Starting PIB Deep Cabinet Archive Ingestion..."
+          for i in {1..3}; do
+            echo "================================================="
+            echo "--- PIB Archive Batch $i of 3 ($(date -u +'%Y-%m-%d %H:%M:%S UTC')) ---"
+            echo "================================================="
+            python3 harvest_pib_cabinet.py || echo "[WARN] Batch $i completed with warnings"
+            sleep 15
+          done
+
+      - name: Sync Manifest (Vault Rollover Check)
+        run: |
+          git config user.name "PoliticalBot"
+          git config user.email "bot@intelligence.internal"
+          git add pib_vault_rollover_manifest.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "[PIB-ROLLOVER-SYNC] Update active PIB vault manifest [skip ci]" && git push)
+
+  retrigger:
+    needs: [harvest-pib]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrigger PIB Harvester Loop
+        env:
+          GH_TOKEN: ${{ secrets.VAULT_PAT }}
+        run: |
+          echo "Triggering next PIB Archive Harvester cycle..."
+          gh workflow run harvest_pib.yml --repo ParshantKumar2007/political-intelligence-engine || true
