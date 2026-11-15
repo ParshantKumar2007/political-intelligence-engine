@@ -2,8 +2,8 @@
   "stream_id": "pib-cabinet-archive",
   "github_user": "ParshantKumar2007",
   "base_vault_name": "pib-cabinet-archive-vault",
-  "active_vault": "pib-cabinet-archive-vault-3",
-  "active_index": 3,
+  "active_vault": "pib-cabinet-archive-vault-4",
+  "active_index": 4,
   "max_size_mb": 450,
   "max_articles": 400000,
   "rollover_history": [
@@ -23,6 +23,12 @@
       "vault": "pib-cabinet-archive-vault-3",
       "index": 3,
       "started_at": "2026-11-14T15:39:47.059800+00:00",
+      "status": "ACTIVE"
+    },
+    {
+      "vault": "pib-cabinet-archive-vault-4",
+      "index": 4,
+      "started_at": "2026-11-15T04:16:28.963896+00:00",
       "status": "ACTIVE"
     }
   ]
