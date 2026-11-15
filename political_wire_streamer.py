@@ -185,7 +185,10 @@ def extract_article_body(url, timeout=5.0):
                     return False
                 if any(b in t_low for b in [
                     "click here for", "subscribe to", "newsletter", "follow us on",
-                    "telegram channel", "all rights reserved", "terms of service", "cookie settings"
+                    "telegram channel", "all rights reserved", "terms of service", "cookie settings",
+                    "active subscription", "subscribed with another", "logout and login",
+                    "account subscription", "premium stories", "sign in to continue",
+                    "already a subscriber", "read full story with"
                 ]):
                     return False
                 return True
