@@ -263,7 +263,9 @@ def fetch_feed(feed_info):
     return items_out
 
 def check_and_perform_rollover(manifest, current_vault, temp_dir, ckpt, pat, seen_hashes):
-    size_mb = get_dir_size_mb(temp_dir)
+    status, repo_info = github_api_request(f"repos/{GITHUB_USER}/{current_vault}", pat, method="GET")
+    gh_size_mb = (repo_info.get("size", 0) / 1024.0) if status == 200 else 0
+    size_mb = max(get_dir_size_mb(temp_dir), gh_size_mb)
     articles_ingested = ckpt.get("articles_ingested", 0)
     max_mb = manifest.get("max_size_mb", 450)
     max_arts = manifest.get("max_articles", 400000)
